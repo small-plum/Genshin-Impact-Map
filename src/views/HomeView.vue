@@ -5,29 +5,28 @@ import FilterHeader from '@/components/FilterHeader.vue'
 import LocationBtn from '@/components/LocationBtn.vue'
 import SelectedArea from '@/components/SelectedArea.vue'
 import FilterMain from '@/components/FilterMain.vue'
+import { getMapAnchorList } from '@/js/api'
+import { useHomeStore } from '@/stores/home'
+
+const store = useHomeStore()
+const { setMapAnchorList } = store
+
 // 初始化
 onMounted(() => {
-  console.log('the components is now mounted.')
   init()
 })
 
-function init() {
-  const mapManager = new MapManager('map')
-  // 显示地名
-  const markerList = [
-    {
-      lat: -99.96875,
-      lng: 125.71875,
-      areaName: '碧水源',
-    },
-    {
-      lat: -88.125,
-      lng: 139.40675,
-      areaName: '苍风高地',
-    },
-  ]
+async function initMapAnchorList() {
+  const res = await getMapAnchorList()
+  setMapAnchorList(res.data)
+}
 
-  mapManager.renderAreaName(markerList)
+async function init() {
+  await initMapAnchorList()
+  const mapManager = new MapManager('map')
+
+  mapManager.setMapAnchorList(store.mapAnchorList)
+  mapManager.renderAreaName()
 
   // 显示标点
   const pointMarkerList = [

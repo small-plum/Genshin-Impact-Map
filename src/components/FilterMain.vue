@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { getMapFilterTree } from '@/js/api'
+import { useHomeStore } from '@/stores/home'
+import { storeToRefs } from 'pinia'
 import { ref, onMounted } from 'vue'
 
+const store = useHomeStore()
 const activeTypeIndex = ref(0)
-const filterTree = ref<any[]>([])
+// 从ctore中取出来
+const { filterTree } = storeToRefs(store)
 
 onMounted(() => {
   init()
@@ -11,7 +15,8 @@ onMounted(() => {
 
 async function init() {
   const res = await getMapFilterTree()
-  filterTree.value = res.data
+  // filterTree.value = res.data
+  store.setFilterTree(res.data)
 }
 
 function getActiveCount(item: any) {

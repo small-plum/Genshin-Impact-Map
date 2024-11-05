@@ -1,9 +1,11 @@
 import L from 'leaflet'
+import { valid } from 'mockjs'
 
 interface AreaNameConfig {
   lat: number
   lng: number
-  areaName: string
+  name: string
+  children: any[]
 }
 interface pointConfig {
   lat: number
@@ -15,6 +17,8 @@ export class MapManager {
   private map: L.Map
   private areaNameLayerGroup: L.LayerGroup | undefined
   private pointLayerGroup: L.LayerGroup | undefined
+  private mapAnchorList: AreaNameConfig[] = []
+  private prevZoom = 0
 
   constructor(domId: string) {
     // 边界
@@ -30,27 +34,58 @@ export class MapManager {
       minZoom: 4, // 设置缩放的最小范围
     })
 
+    this.prevZoom = this.map.getZoom()
+
     L.tileLayer('images/map/{z}/{x}/{y}.png', {
       bounds, //限制不会请求负数的点位
       maxZoom: 7,
       minZoom: 4,
       noWrap: true,
     }).addTo(this.map)
+
+    // 对重新渲染的情况进行优化，不是只要放大缩小就重新渲染
+    this.map.on('zoom', () => {
+      const prevRenderFlag = this.prevZoom >= 6
+      const curRenderFlag = this.map.getZoom() >= 6
+      if (prevRenderFlag !== curRenderFlag) {
+        this.renderAreaName()
+        this.prevZoom = this.map.getZoom()
+      }
+      this.renderAreaName()
+    })
   }
 
-  renderAreaName(configList: AreaNameConfig[]) {
-    const markers = configList.map(val => {
-      const { lat, lng, areaName } = val // 对象解构赋值
-      const marker = L.marker(L.latLng(lat, lng), {
-        icon: L.divIcon({
-          className: 'map-marker-item',
-          html: `<div class="area-mark-item">${areaName}</div>`,
-        }),
+  setMapAnchorList(configList: AreaNameConfig[]) {
+    this.mapAnchorList = configList
+  }
+
+  // 渲染地名函数
+  renderAreaName() {
+    this.areaNameLayerGroup?.clearLayers()
+
+    let markers: L.Marker[] = []
+    if (this.map.getZoom() >= 6) {
+      this.mapAnchorList.forEach(val => {
+        let childrenList: L.Marker[] = []
+        childrenList = val.children.map(this.getAreaNameMarkerItem)
+        markers = markers.concat(childrenList)
       })
-      return marker
-    })
+    } else {
+      markers = this.mapAnchorList.map(this.getAreaNameMarkerItem)
+    }
+
     this.areaNameLayerGroup = L.layerGroup(markers)
     this.areaNameLayerGroup.addTo(this.map)
+  }
+
+  getAreaNameMarkerItem(config: AreaNameConfig) {
+    const { lat = 0, lng = 0, name } = config // 对象解构赋值
+    return L.marker(L.latLng(lat, lng), {
+      icon: L.divIcon({
+        className: 'map-marker-item',
+        html: `<div class="area-mark-item">${name}</div>`,
+      }),
+    })
   }
 
   renderPoints(pointList: pointConfig[]) {
