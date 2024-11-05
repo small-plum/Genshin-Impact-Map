@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance } from 'axios'
+import { MainHost } from './constants'
 
 export class BaseRequest {
   private axiosInst: AxiosInstance
@@ -20,9 +21,21 @@ export class BaseRequest {
     path: string,
     params: any = null,
     data: any = null,
-  ) {
-    return this.axiosInst.request({ method, url: path, params, data })
+  ): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.axiosInst
+        .request({ method, url: path, params, data })
+        .then(res => {
+          resolve(res.data)
+
+          // const { code } = res.data
+          // if (code !== 0) {
+          //   toast('出现未知错误')
+          // }
+        })
+        .catch(reject)
+    })
   }
 }
 
-export const mainRequest = new BaseRequest('http://www.myhost.com/map')
+export const mainRequest = new BaseRequest(MainHost)
