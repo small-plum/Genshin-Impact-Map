@@ -1,9 +1,15 @@
 <script setup lang="ts">
+import { globalDataInst } from '../js/global-data'
 import { useHomeStore } from '@/stores/home'
 import { storeToRefs } from 'pinia'
 
 const store = useHomeStore()
 const { mapAnchorList } = storeToRefs(store)
+
+function onAreaNameClick(item: any, type: number) {
+  const zoom = type === 1 ? 5 : 6
+  globalDataInst.mapManager.flyTo(item, zoom)
+}
 </script>
 
 <template>
@@ -13,12 +19,13 @@ const { mapAnchorList } = storeToRefs(store)
       <div class="location-title">快速定位</div>
       <div class="content-areas">
         <div class="area-item" v-for="item in mapAnchorList" :key="item.id">
-          <div class="area-parent">
+          <div class="area-parent" @click="onAreaNameClick(item, 1)">
             <div class="parent-icon"></div>
             <div class="parent-name">{{ item.name }}</div>
           </div>
           <div
             class="area-child"
+            @click="onAreaNameClick(child, 2)"
             v-for="child in item.children"
             :key="child.id"
           >

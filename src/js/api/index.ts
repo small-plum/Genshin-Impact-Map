@@ -7,3 +7,7 @@ export function getMapFilterTree() {
 export function getMapAnchorList() {
   return mainRequest.sendRequest('get', '/map_anchor/list')
 }
+
+export function getMapPointDetail(pointId: number) {
+  return mainRequest.sendRequest('get', '/map/point/detail', { pointId })
+}

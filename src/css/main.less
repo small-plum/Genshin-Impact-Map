@@ -2,6 +2,132 @@
 
 #app {
   overflow: hidden;
+  .home-view {
+    .leaflet-popup {
+      margin-left: 220px;
+      margin-bottom: -295px;
+      .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        background-color: #3b4354;
+        box-shadow: none;
+        padding: 0;
+        .leaflet-popup-content {
+          width: auto !important;
+          margin: 0;
+          .point-popup-container {
+            width: 375px;
+            font-size: 14px;
+            position: relative;
+            padding: 12px 12px 10px;
+            .popup-title {
+              color: #d3bc8e;
+              margin-bottom: 7px;
+            }
+            .popup-pic {
+              width: 355;
+              height: 200px;
+              border-radius: 6px;
+              background-size: cover;
+            }
+            .point-name {
+              color: #ece5d8;
+              margin-top: 10px;
+            }
+            .contributor-container {
+              display: flex;
+              margin-top: 10px;
+              .contributor-label {
+                color: #9b9c9f;
+                font-size: 12px;
+                margin-right: 10px;
+                padding-top: 6px;
+              }
+              .avatar-container {
+                display: flex;
+                .avatar-item {
+                  width: 24px;
+                  height: 24px;
+                  border-radius: 50%;
+                }
+              }
+            }
+            .point-time {
+              font-size: 12px;
+              color: #9b9c9f;
+              line-height: 30px;
+            }
+          }
+        }
+      }
+    }
+
+    .leaflet-poup-tip-container {
+      display: none;
+    }
+
+    .leaflet-popup-close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      background-image: url('../assets/images/map/close-icon.png');
+      background-size: cover;
+    }
+
+    // 滑动条样式覆盖
+    .leaflet-touch {
+      .leaflet-bar {
+        a {
+          &:first-child {
+            background-image: url('../assets/images/ui/scale-add-icon.png');
+            background-color: transparent;
+            border: none;
+            width: 20px;
+            height: 20px;
+            background-size: cover;
+            margin-bottom: 10px;
+          }
+          &:last-child {
+            background-image: url('../assets/images/ui/scale-minus-icon.png');
+            background-color: transparent;
+            border: none;
+            width: 20px;
+            height: 20px;
+            background-size: cover;
+            margin-top: 10px;
+          }
+        }
+      }
+    }
+
+    .leaflet-control-zoomslider {
+      position: relative;
+      left: -10px;
+      bottom: 20px;
+      border: none;
+      .leaflet-control-zoomslider-wrap {
+        width: 20px;
+        .leaflet-control-zoomslider-body {
+          width: 10px;
+          border-radius: 5px;
+          background: rgba(0, 0, 0, 0.4);
+          border: 1px solid hsla(0, 0%, 100%, 0.5);
+          position: relative;
+          margin: 0 auto;
+          .leaflet-control-zoomslider-knob {
+            position: relative;
+            left: -6px;
+            width: 20px;
+            height: 20px;
+            background-image: url('../assets/images/ui/scale-pro-icon.png');
+            background-size: cover;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
 }
 
 .map-marker-item {
@@ -20,8 +146,43 @@
   width: 37px;
   height: 40px;
   background-size: cover;
-  background-image: url('../assets/images/icon-bg.png');
+  background-image: url('../assets/images/map/icon-bg.png');
   padding-top: 3px;
+  .arrow-icon {
+    position: absolute;
+    display: none;
+    width: 10px;
+    height: 10px;
+    background-image: url('../assets/images/map/arrow-l.png');
+    background-size: cover;
+    &.lb {
+      left: 0;
+      bottom: 6px;
+    }
+    &.lt {
+      transform: scaleY(-1);
+      left: 0;
+      top: -4px;
+    }
+    &.rb {
+      transform: scaleX(-1);
+      right: 0;
+      bottom: 6px;
+    }
+    &.rt {
+      transform: scale(-1);
+      right: 0;
+      top: -4px;
+    }
+  }
+  &.active {
+    background-image: url('../assets/images/map/icon-bg-active.png');
+    transform: scale(1.2);
+    transform-origin: center bottom;
+    .arrow-icon {
+      display: block;
+    }
+  }
   .point-pic {
     width: 25px;
     height: 25px;

@@ -7,6 +7,7 @@ import SelectedArea from '@/components/SelectedArea.vue'
 import FilterMain from '@/components/FilterMain.vue'
 import { getMapAnchorList } from '@/js/api'
 import { useHomeStore } from '@/stores/home'
+import { globalDataInst } from '../js/global-data'
 
 const store = useHomeStore()
 const { setMapAnchorList } = store
@@ -23,28 +24,12 @@ async function initMapAnchorList() {
 
 async function init() {
   await initMapAnchorList()
-  const mapManager = new MapManager('map')
+  globalDataInst.mapManager = new MapManager('map')
 
-  mapManager.setMapAnchorList(store.mapAnchorList)
-  mapManager.renderAreaName()
-
-  // 显示标点
-  const pointMarkerList = [
-    {
-      lat: -90.5625,
-      lng: 144.65626,
-      iconId: 1,
-    },
-    {
-      lat: -99.53125,
-      lng: 131.65626,
-      iconId: 1,
-    },
-  ]
-  mapManager.renderPoints(pointMarkerList)
-
+  globalDataInst.mapManager.setMapAnchorList(store.mapAnchorList)
   // 调用点击打印坐标的代码
-  mapManager.enableClickDebug()
+  globalDataInst.mapManager.enableClickDebug()
+  globalDataInst.mapManager.renderAreaName()
 }
 </script>
 

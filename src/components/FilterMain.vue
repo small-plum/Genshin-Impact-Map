@@ -81,7 +81,7 @@ function onTypeItemClick(index: number) {
                   backgroundImage: `url(${child.icon})`,
                 }"
               ></div>
-              <div class="icon-count">{{ child.point_count }}</div>
+              <div class="icon-count">{{ child.children.length }}</div>
               <div class="selected-icon" v-if="child.active"></div>
             </div>
             <div class="content-item-name">{{ child.name }}</div>
