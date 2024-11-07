@@ -1,6 +1,7 @@
 import L from 'leaflet'
 import {} from 'mockjs'
 import { getMapPointDetail } from './api'
+import { EventManager } from './event-manager'
 
 interface AreaNameConfig {
   lat: number
@@ -15,6 +16,16 @@ interface pointConfig {
   pointId: number
   name: string
 }
+export interface GuideUIItem {
+  lat: number
+  lng: number
+  icon: string
+  angle: number
+}
+interface Vector {
+  x: number
+  y: number
+}
 
 export class MapManager {
   private map: L.Map
@@ -23,6 +34,7 @@ export class MapManager {
   private mapAnchorList: AreaNameConfig[] = []
   private prevZoom = 0
   private lastActivePointId = -1
+  private pointList: PointConfig[] = []
 
   constructor(domId: string) {
     // 边界
@@ -66,6 +78,7 @@ export class MapManager {
     })
 
     this.map.on('click', this.onMapClick.bind(this))
+    this.map.on('moveend', this.onMapMoveEnd.bind(this))
   }
 
   onMapClick() {
@@ -74,6 +87,10 @@ export class MapManager {
     )
     lastActivePoint?.classList.remove('active')
     this.lastActivePointId = -1
+  }
+
+  onMapMoveEnd() {
+    this.calcOutScreenPoints()
   }
 
   setMapAnchorList(configList: AreaNameConfig[]) {
@@ -111,6 +128,7 @@ export class MapManager {
   }
   // 渲染地图标点
   renderPoints(pointList: pointConfig[]) {
+    this.pointList = pointList
     this.pointLayerGroup?.clearLayers()
     const pointMarkers = pointList.map(val => {
       const { lat, lng, icon, pointId, name } = val // 对象解构赋值
@@ -163,6 +181,55 @@ export class MapManager {
 
     this.pointLayerGroup = L.layerGroup(pointMarkers)
     this.pointLayerGroup.addTo(this.map)
+
+    this.calcOutScreenPoints()
+  }
+
+  //计算每个类别最近的点
+  calcOutScreenPoints() {
+    const guideUIAry: GuideUIItem[] = []
+    const calcPointMap: { [key: string]: any } = {}
+    const center = this.map.getCenter()
+    for (let i = 0; i < this.pointList.length; i++) {
+      const pointItem = this.pointList[i]
+      const { name } = pointItem
+      if (!calcPointMap[name]) {
+        calcPointMap[name] = {}
+      }
+      if (calcPointMap[name].inScreen) {
+        continue
+      }
+
+      // const bounds = this.map.getBounds() // 地图所覆盖的经纬度的范围
+      // if(lat <bounds.getNorthEast().lat && lat > bounds.getSouthWest)
+      const isContain = this.map.getBounds().contains(pointItem)
+      if (!isContain) {
+        const dist = center.distanceTo(pointItem)
+        if (!calcPointMap[name].pointItem) {
+          calcPointMap[name] = { dist, pointItem, inScreen: false }
+        } else {
+          const curDist = calcPointMap[name].dist
+          if (dist < curDist) {
+            calcPointMap[name] = { dist, pointItem, inScreen: false }
+          }
+        }
+      } else {
+        calcPointMap[name].inScreen = true
+      }
+    }
+
+    for (const key in calcPointMap) {
+      const { inScreen, pointItem } = calcPointMap[key]
+      if (!inScreen) {
+        const { lat, lng, icon } = pointItem
+        const directionVector = { x: lng - center.lng, y: lat - center.lat }
+        const xVector = { x: 1, y: 0 }
+        const angle = calcVectorangle(xVector, directionVector)
+        guideUIAry.push({ angle, icon, lat, lng })
+      }
+    }
+
+    EventManager.emit('RenderMapGuideUI', guideUIAry)
   }
 
   // 动态生成模板
@@ -196,4 +263,18 @@ export class MapManager {
       console.log('cordinate', cordinate)
     })
   }
+}
+
+// 计算两个向量之间的夹角
+function calcVectorangle(vectorA: Vector, vectorB: Vector) {
+  const dotProduct = vectorA.x * vectorB.x + vectorA.y * vectorB.y
+  const magnitudeA = Math.sqrt(vectorA.x * vectorA.x + vectorA.y * vectorA.y) // A的模
+  const magnitudeB = Math.sqrt(vectorB.x * vectorB.x + vectorB.y * vectorB.y) // B的模
+
+  const cosTheta = dotProduct / (magnitudeA * magnitudeB)
+  const theta = Math.acos(cosTheta)
+
+  const crossProduct = vectorA.x * vectorB.y - vectorA.y * vectorB.x
+  const direction = crossProduct > 0 ? 1 : -1
+  return direction * theta
 }

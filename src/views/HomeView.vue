@@ -5,6 +5,7 @@ import FilterHeader from '@/components/FilterHeader.vue'
 import LocationBtn from '@/components/LocationBtn.vue'
 import SelectedArea from '@/components/SelectedArea.vue'
 import FilterMain from '@/components/FilterMain.vue'
+import GuideMarkerUI from '@/components/GuideMarkerUI.vue'
 import { getMapAnchorList } from '@/js/api'
 import { useHomeStore } from '@/stores/home'
 import { globalDataInst } from '../js/global-data'
@@ -55,6 +56,7 @@ async function init() {
           <FilterMain />
         </div>
       </div>
+      <GuideMarkerUI />
     </div>
   </div>
 </template>
@@ -83,6 +85,7 @@ async function init() {
     position: absolute;
     left: 0;
     top: 0;
+    z-index: 3;
     width: 415px;
     height: 100%;
     padding: 20px;
